@@ -342,21 +342,14 @@ class AbstractGrantTest extends TestCase
         $this->assertNull($issueRefreshTokenMethod->invoke($grantMock, $accessToken));
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testIssueAccessToken($privateKey)
+    public function testIssueAccessToken()
     {
-        $client = new ClientEntity();
-        $client->setIdentifier('client-id');
-        $accessTokenEntity = new AccessTokenEntity();
-        $accessTokenEntity->setClient($client);
         $accessTokenRepoMock = $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock();
-        $accessTokenRepoMock->method('getNewToken')->willReturn($accessTokenEntity);
+        $accessTokenRepoMock->method('getNewToken')->willReturn(new AccessTokenEntity());
 
         /** @var AbstractGrant $grantMock */
         $grantMock = $this->getMockForAbstractClass(AbstractGrant::class);
-        $grantMock->setPrivateKey(new CryptKey($privateKey));
+        $grantMock->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
         $grantMock->setAccessTokenRepository($accessTokenRepoMock);
 
         $abstractGrantReflection = new \ReflectionClass($grantMock);
@@ -367,18 +360,11 @@ class AbstractGrantTest extends TestCase
         $accessToken = $issueAccessTokenMethod->invoke(
             $grantMock,
             new DateInterval('PT1H'),
-            $client,
+            new ClientEntity(),
             123,
             [new ScopeEntity()]
         );
         $this->assertInstanceOf(AccessTokenEntityInterface::class, $accessToken);
-
-        try {
-            $token = (string) $accessToken;
-            $this->assertNotEmpty($token);
-        } catch (\Throwable $e) {
-            $this->fail('The access token have not been issue. ' . $e->getMessage());
-        }
     }
 
     public function testIssueAuthCode()
@@ -501,13 +487,5 @@ class AbstractGrantTest extends TestCase
         $this->expectException(\LogicException::class);
 
         $grantMock->completeAuthorizationRequest(new AuthorizationRequest());
-    }
-
-    public function privateKeys(): array
-    {
-        return [
-            'file key' => ['file://' . __DIR__ . '/../Stubs/private.key'],
-            'inmemory key' => [\file_get_contents(__DIR__ . '/../Stubs/private.key')],
-        ];
     }
 }

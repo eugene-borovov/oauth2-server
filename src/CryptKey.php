@@ -11,6 +11,7 @@
 
 namespace League\OAuth2\Server;
 
+use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Signer\Key\LocalFileReference;
 use LogicException;
@@ -51,7 +52,7 @@ class CryptKey
                 throw new LogicException(\sprintf('Key path "%s" does not exist or is not readable', $keyPath));
             }
 
-            if ($keyPermissionsCheck === true && PHP_OS_FAMILY !== 'Windows') {
+            if ($keyPermissionsCheck === true) {
                 // Verify the permissions of the key
                 $keyPathPerms = \decoct(\fileperms($keyPath) & 0777);
                 if (\in_array($keyPathPerms, ['400', '440', '600', '640', '660'], true) === false) {
@@ -109,9 +110,9 @@ class CryptKey
      *
      * @internal Remove when the JWT configuration is moved to the dependency injection container
      *
-     * @return \Lcobucci\JWT\Signer\Key
+     * @return Key
      */
-    public function createSignerKey(): \Lcobucci\JWT\Signer\Key
+    public function createSignerKey(): Key
     {
         if ($this->isFilePath()) {
             return LocalFileReference::file($this->keyPath, $this->passPhrase ?? '');

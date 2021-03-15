@@ -20,13 +20,10 @@ use Psr\Http\Message\ResponseInterface;
 
 class BearerResponseTypeTest extends TestCase
 {
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testGenerateHttpResponse($privateKey, $publicKey)
+    public function testGenerateHttpResponse()
     {
         $responseType = new BearerTokenResponse();
-        $responseType->setPrivateKey(new CryptKey($privateKey));
+        $responseType->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
         $responseType->setEncryptionKey(\base64_encode(\random_bytes(36)));
 
         $client = new ClientEntity();
@@ -40,7 +37,7 @@ class BearerResponseTypeTest extends TestCase
         $accessToken->setExpiryDateTime((new DateTimeImmutable())->add(new DateInterval('PT1H')));
         $accessToken->setClient($client);
         $accessToken->addScope($scope);
-        $accessToken->setPrivateKey(new CryptKey($privateKey));
+        $accessToken->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $refreshToken = new RefreshTokenEntity();
         $refreshToken->setIdentifier('abcdef');
@@ -66,13 +63,10 @@ class BearerResponseTypeTest extends TestCase
         $this->assertObjectHasAttribute('refresh_token', $json);
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testGenerateHttpResponseWithExtraParams($privateKey, $publicKey)
+    public function testGenerateHttpResponseWithExtraParams()
     {
         $responseType = new BearerTokenResponseWithParams();
-        $responseType->setPrivateKey(new CryptKey($privateKey));
+        $responseType->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
         $responseType->setEncryptionKey(\base64_encode(\random_bytes(36)));
 
         $client = new ClientEntity();
@@ -86,7 +80,7 @@ class BearerResponseTypeTest extends TestCase
         $accessToken->setExpiryDateTime((new DateTimeImmutable())->add(new DateInterval('PT1H')));
         $accessToken->setClient($client);
         $accessToken->addScope($scope);
-        $accessToken->setPrivateKey(new CryptKey($privateKey));
+        $accessToken->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $refreshToken = new RefreshTokenEntity();
         $refreshToken->setIdentifier('abcdef');
@@ -115,13 +109,10 @@ class BearerResponseTypeTest extends TestCase
         $this->assertEquals('bar', $json->foo);
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testDetermineAccessTokenInHeaderValidToken($privateKey, $publicKey)
+    public function testDetermineAccessTokenInHeaderValidToken()
     {
         $responseType = new BearerTokenResponse();
-        $responseType->setPrivateKey(new CryptKey($privateKey));
+        $responseType->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
         $responseType->setEncryptionKey(\base64_encode(\random_bytes(36)));
 
         $client = new ClientEntity();
@@ -132,7 +123,7 @@ class BearerResponseTypeTest extends TestCase
         $accessToken->setUserIdentifier(123);
         $accessToken->setExpiryDateTime((new DateTimeImmutable())->add(new DateInterval('PT1H')));
         $accessToken->setClient($client);
-        $accessToken->setPrivateKey(new CryptKey($privateKey));
+        $accessToken->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $refreshToken = new RefreshTokenEntity();
         $refreshToken->setIdentifier('abcdef');
@@ -149,7 +140,7 @@ class BearerResponseTypeTest extends TestCase
         $accessTokenRepositoryMock->method('isAccessTokenRevoked')->willReturn(false);
 
         $authorizationValidator = new BearerTokenValidator($accessTokenRepositoryMock);
-        $authorizationValidator->setPublicKey(new CryptKey($publicKey));
+        $authorizationValidator->setPublicKey(new CryptKey('file://' . __DIR__ . '/../Stubs/public.key'));
 
         $request = (new ServerRequest())->withHeader('authorization', \sprintf('Bearer %s', $json->access_token));
 
@@ -161,15 +152,12 @@ class BearerResponseTypeTest extends TestCase
         $this->assertEquals([], $request->getAttribute('oauth_scopes'));
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testDetermineAccessTokenInHeaderInvalidJWT($privateKey, $publicKey)
+    public function testDetermineAccessTokenInHeaderInvalidJWT()
     {
         $accessTokenRepositoryMock = $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock();
 
         $responseType = new BearerTokenResponse();
-        $responseType->setPrivateKey(new CryptKey($privateKey));
+        $responseType->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
         $responseType->setEncryptionKey(\base64_encode(\random_bytes(36)));
 
         $client = new ClientEntity();
@@ -180,7 +168,7 @@ class BearerResponseTypeTest extends TestCase
         $accessToken->setUserIdentifier(123);
         $accessToken->setExpiryDateTime((new DateTimeImmutable())->add(new DateInterval('PT1H')));
         $accessToken->setClient($client);
-        $accessToken->setPrivateKey(new CryptKey($privateKey));
+        $accessToken->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $refreshToken = new RefreshTokenEntity();
         $refreshToken->setIdentifier('abcdef');
@@ -194,7 +182,7 @@ class BearerResponseTypeTest extends TestCase
         $json = \json_decode((string) $response->getBody());
 
         $authorizationValidator = new BearerTokenValidator($accessTokenRepositoryMock);
-        $authorizationValidator->setPublicKey(new CryptKey($publicKey));
+        $authorizationValidator->setPublicKey(new CryptKey('file://' . __DIR__ . '/../Stubs/public.key'));
 
         $request = (new ServerRequest())->withHeader('authorization', \sprintf('Bearer %s', $json->access_token . 'foo'));
 
@@ -208,13 +196,10 @@ class BearerResponseTypeTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testDetermineAccessTokenInHeaderRevokedToken($privateKey, $publicKey)
+    public function testDetermineAccessTokenInHeaderRevokedToken()
     {
         $responseType = new BearerTokenResponse();
-        $responseType->setPrivateKey(new CryptKey($privateKey));
+        $responseType->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
         $responseType->setEncryptionKey(\base64_encode(\random_bytes(36)));
 
         $client = new ClientEntity();
@@ -225,7 +210,7 @@ class BearerResponseTypeTest extends TestCase
         $accessToken->setUserIdentifier(123);
         $accessToken->setExpiryDateTime((new DateTimeImmutable())->add(new DateInterval('PT1H')));
         $accessToken->setClient($client);
-        $accessToken->setPrivateKey(new CryptKey($privateKey));
+        $accessToken->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $refreshToken = new RefreshTokenEntity();
         $refreshToken->setIdentifier('abcdef');
@@ -242,7 +227,7 @@ class BearerResponseTypeTest extends TestCase
         $accessTokenRepositoryMock->method('isAccessTokenRevoked')->willReturn(true);
 
         $authorizationValidator = new BearerTokenValidator($accessTokenRepositoryMock);
-        $authorizationValidator->setPublicKey(new CryptKey($publicKey));
+        $authorizationValidator->setPublicKey(new CryptKey('file://' . __DIR__ . '/../Stubs/public.key'));
 
         $request = (new ServerRequest())->withHeader('authorization', \sprintf('Bearer %s', $json->access_token));
 
@@ -256,19 +241,16 @@ class BearerResponseTypeTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testDetermineAccessTokenInHeaderInvalidToken($privateKey, $publicKey)
+    public function testDetermineAccessTokenInHeaderInvalidToken()
     {
         $responseType = new BearerTokenResponse();
-        $responseType->setPrivateKey(new CryptKey($privateKey));
+        $responseType->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
         $responseType->setEncryptionKey(\base64_encode(\random_bytes(36)));
 
         $accessTokenRepositoryMock = $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock();
 
         $authorizationValidator = new BearerTokenValidator($accessTokenRepositoryMock);
-        $authorizationValidator->setPublicKey(new CryptKey($publicKey));
+        $authorizationValidator->setPublicKey(new CryptKey('file://' . __DIR__ . '/../Stubs/public.key'));
 
         $request = (new ServerRequest())->withHeader('authorization', 'Bearer blah');
 
@@ -282,19 +264,16 @@ class BearerResponseTypeTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testDetermineMissingBearerInHeader($privateKey, $publicKey)
+    public function testDetermineMissingBearerInHeader()
     {
         $responseType = new BearerTokenResponse();
-        $responseType->setPrivateKey(new CryptKey($privateKey));
+        $responseType->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
         $responseType->setEncryptionKey(\base64_encode(\random_bytes(36)));
 
         $accessTokenRepositoryMock = $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock();
 
         $authorizationValidator = new BearerTokenValidator($accessTokenRepositoryMock);
-        $authorizationValidator->setPublicKey(new CryptKey($publicKey));
+        $authorizationValidator->setPublicKey(new CryptKey('file://' . __DIR__ . '/../Stubs/public.key'));
 
         $request = (new ServerRequest())->withHeader('authorization', 'Bearer blah.blah.blah');
 
@@ -306,19 +285,5 @@ class BearerResponseTypeTest extends TestCase
                 $e->getHint()
             );
         }
-    }
-
-    public function signerKeys(): array
-    {
-        return [
-            'file key' => [
-                'file://' . __DIR__ . '/../Stubs/private.key',
-                'file://' . __DIR__ . '/../Stubs/public.key',
-            ],
-            'inmemory key' => [
-                \file_get_contents(__DIR__ . '/../Stubs/private.key'),
-                \file_get_contents(__DIR__ . '/../Stubs/public.key'),
-            ],
-        ];
     }
 }

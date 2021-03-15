@@ -26,10 +26,7 @@ class ClientCredentialsGrantTest extends TestCase
         $this->assertEquals('client_credentials', $grant->getIdentifier());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequest($privateKey)
+    public function testRespondToRequest()
     {
         $client = new ClientEntity();
         $client->setConfidential();
@@ -52,7 +49,7 @@ class ClientCredentialsGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setScopeRepository($scopeRepositoryMock);
         $grant->setDefaultScope(self::DEFAULT_SCOPE);
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $serverRequest = (new ServerRequest())->withParsedBody([
             'client_id'     => 'foo',
@@ -63,13 +60,5 @@ class ClientCredentialsGrantTest extends TestCase
         $grant->respondToAccessTokenRequest($serverRequest, $responseType, new DateInterval('PT5M'));
 
         $this->assertInstanceOf(AccessTokenEntityInterface::class, $responseType->getAccessToken());
-    }
-
-    public function privateKeys(): array
-    {
-        return [
-            'file key' => ['file://' . __DIR__ . '/../Stubs/private.key'],
-            'inmemory key' => [\file_get_contents(__DIR__ . '/../Stubs/private.key')],
-        ];
     }
 }

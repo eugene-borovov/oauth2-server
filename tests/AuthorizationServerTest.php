@@ -39,16 +39,13 @@ class AuthorizationServerTest extends TestCase
         \chmod(__DIR__ . '/Stubs/private.key.crlf', 0600);
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testRespondToRequestInvalidGrantType($privateKey, $encryptionKey)
+    public function testRespondToRequestInvalidGrantType()
     {
         $server = new AuthorizationServer(
             $this->getMockBuilder(ClientRepositoryInterface::class)->getMock(),
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
             $this->getMockBuilder(ScopeRepositoryInterface::class)->getMock(),
-            $privateKey,
+            'file://' . __DIR__ . '/Stubs/private.key',
             \base64_encode(\random_bytes(36)),
             new StubResponseType()
         );
@@ -63,10 +60,7 @@ class AuthorizationServerTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testRespondToRequest($privateKey, $encryptionKey)
+    public function testRespondToRequest()
     {
         $client = new ClientEntity();
 
@@ -88,7 +82,7 @@ class AuthorizationServerTest extends TestCase
             $clientRepository,
             $accessTokenRepositoryMock,
             $scopeRepositoryMock,
-            $privateKey,
+            'file://' . __DIR__ . '/Stubs/private.key',
             \base64_encode(\random_bytes(36)),
             new StubResponseType()
         );
@@ -103,10 +97,7 @@ class AuthorizationServerTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testGetResponseType($privateKey, $encryptionKey)
+    public function testGetResponseType()
     {
         $clientRepository = $this->getMockBuilder(ClientRepositoryInterface::class)->getMock();
 
@@ -114,8 +105,8 @@ class AuthorizationServerTest extends TestCase
             $clientRepository,
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
             $this->getMockBuilder(ScopeRepositoryInterface::class)->getMock(),
-            $privateKey,
-            $encryptionKey
+            'file://' . __DIR__ . '/Stubs/private.key',
+            'file://' . __DIR__ . '/Stubs/public.key'
         );
 
         $abstractGrantReflection = new \ReflectionClass($server);
@@ -125,19 +116,18 @@ class AuthorizationServerTest extends TestCase
         $this->assertInstanceOf(BearerTokenResponse::class, $method->invoke($server));
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testGetResponseTypeExtended($privateKey, $encryptionKey)
+    public function testGetResponseTypeExtended()
     {
         $clientRepository = $this->getMockBuilder(ClientRepositoryInterface::class)->getMock();
+        $privateKey = 'file://' . __DIR__ . '/Stubs/private.key';
+        $encryptionKey = 'file://' . __DIR__ . '/Stubs/public.key';
 
         $server = new AuthorizationServer(
             $clientRepository,
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
             $this->getMockBuilder(ScopeRepositoryInterface::class)->getMock(),
-            $privateKey,
-            $encryptionKey
+            'file://' . __DIR__ . '/Stubs/private.key',
+            'file://' . __DIR__ . '/Stubs/public.key'
         );
 
         $abstractGrantReflection = new \ReflectionClass($server);
@@ -159,11 +149,11 @@ class AuthorizationServerTest extends TestCase
         $this->assertSame($encryptionKey, $encryptionKeyProperty->getValue($responseType));
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testMultipleRequestsGetDifferentResponseTypeInstances($privateKey, $encryptionKey)
+    public function testMultipleRequestsGetDifferentResponseTypeInstances()
     {
+        $privateKey = 'file://' . __DIR__ . '/Stubs/private.key';
+        $encryptionKey = 'file://' . __DIR__ . '/Stubs/public.key';
+
         $responseTypePrototype = new class extends BearerTokenResponse {
             /* @return null|CryptKey */
             public function getPrivateKey()
@@ -211,10 +201,7 @@ class AuthorizationServerTest extends TestCase
         $this->assertNotSame($responseTypeA, $responseTypeB);
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testCompleteAuthorizationRequest($privateKey, $encryptionKey)
+    public function testCompleteAuthorizationRequest()
     {
         $clientRepository = $this->getMockBuilder(ClientRepositoryInterface::class)->getMock();
 
@@ -222,8 +209,8 @@ class AuthorizationServerTest extends TestCase
             $clientRepository,
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
             $this->getMockBuilder(ScopeRepositoryInterface::class)->getMock(),
-            $privateKey,
-            $encryptionKey
+            'file://' . __DIR__ . '/Stubs/private.key',
+            'file://' . __DIR__ . '/Stubs/public.key'
         );
 
         $authCodeRepository = $this->getMockBuilder(AuthCodeRepositoryInterface::class)->getMock();
@@ -249,10 +236,7 @@ class AuthorizationServerTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testValidateAuthorizationRequest($privateKey, $encryptionKey)
+    public function testValidateAuthorizationRequest()
     {
         $client = new ClientEntity();
         $client->setRedirectUri('http://foo/bar');
@@ -275,8 +259,8 @@ class AuthorizationServerTest extends TestCase
             $clientRepositoryMock,
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
             $scopeRepositoryMock,
-            $privateKey,
-            $encryptionKey
+            'file://' . __DIR__ . '/Stubs/private.key',
+            'file://' . __DIR__ . '/Stubs/public.key'
         );
 
         $server->setDefaultScope(self::DEFAULT_SCOPE);
@@ -299,10 +283,7 @@ class AuthorizationServerTest extends TestCase
         $this->assertInstanceOf(AuthorizationRequest::class, $server->validateAuthorizationRequest($request));
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testValidateAuthorizationRequestWithMissingRedirectUri($privateKey, $encryptionKey)
+    public function testValidateAuthorizationRequestWithMissingRedirectUri()
     {
         $client = new ClientEntity();
         $client->setConfidential();
@@ -321,8 +302,8 @@ class AuthorizationServerTest extends TestCase
             $clientRepositoryMock,
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
             $this->getMockBuilder(ScopeRepositoryInterface::class)->getMock(),
-            $privateKey,
-            $encryptionKey
+            'file://' . __DIR__ . '/Stubs/private.key',
+            'file://' . __DIR__ . '/Stubs/public.key'
         );
         $server->enableGrantType($grant);
 
@@ -348,17 +329,14 @@ class AuthorizationServerTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testValidateAuthorizationRequestUnregistered($privateKey, $encryptionKey)
+    public function testValidateAuthorizationRequestUnregistered()
     {
         $server = new AuthorizationServer(
             $this->getMockBuilder(ClientRepositoryInterface::class)->getMock(),
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
             $this->getMockBuilder(ScopeRepositoryInterface::class)->getMock(),
-            $privateKey,
-            $encryptionKey
+            'file://' . __DIR__ . '/Stubs/private.key',
+            'file://' . __DIR__ . '/Stubs/public.key'
         );
 
         $request = (new ServerRequest())->withQueryParams([
@@ -370,19 +348,5 @@ class AuthorizationServerTest extends TestCase
         $this->expectExceptionCode(2);
 
         $server->validateAuthorizationRequest($request);
-    }
-
-    public function signerKeys(): array
-    {
-        return [
-            'file key' => [
-                'file://' . __DIR__ . '/Stubs/private.key',
-                'file://' . __DIR__ . '/Stubs/public.key',
-            ],
-            'inmemory key' => [
-                \file_get_contents(__DIR__ . '/Stubs/private.key'),
-                \file_get_contents(__DIR__ . '/Stubs/public.key'),
-            ],
-        ];
     }
 }

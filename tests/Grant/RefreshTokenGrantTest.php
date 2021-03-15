@@ -40,10 +40,7 @@ class RefreshTokenGrantTest extends TestCase
         $this->assertEquals('refresh_token', $grant->getIdentifier());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequest($privateKey)
+    public function testRespondToRequest()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -70,7 +67,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setScopeRepository($scopeRepositoryMock);
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $oldRefreshToken = $this->cryptStub->doEncrypt(
             \json_encode(
@@ -99,10 +96,7 @@ class RefreshTokenGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $responseType->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequestNullRefreshToken($privateKey)
+    public function testRespondToRequestNullRefreshToken()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -130,7 +124,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setScopeRepository($scopeRepositoryMock);
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $oldRefreshToken = $this->cryptStub->doEncrypt(
             \json_encode(
@@ -159,10 +153,7 @@ class RefreshTokenGrantTest extends TestCase
         $this->assertNull($responseType->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToReducedScopes($privateKey)
+    public function testRespondToReducedScopes()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -189,7 +180,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setScopeRepository($scopeRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $oldRefreshToken = $this->cryptStub->doEncrypt(
             \json_encode(
@@ -218,10 +209,7 @@ class RefreshTokenGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $responseType->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToUnexpectedScope($privateKey)
+    public function testRespondToUnexpectedScope()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -246,7 +234,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setScopeRepository($scopeRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $oldRefreshToken = $this->cryptStub->doEncrypt(
             \json_encode(
@@ -276,10 +264,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->respondToAccessTokenRequest($serverRequest, $responseType, new DateInterval('PT5M'));
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequestMissingOldToken($privateKey)
+    public function testRespondToRequestMissingOldToken()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -295,7 +280,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setClientRepository($clientRepositoryMock);
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $serverRequest = (new ServerRequest())->withParsedBody([
             'client_id'     => 'foo',
@@ -310,10 +295,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->respondToAccessTokenRequest($serverRequest, $responseType, new DateInterval('PT5M'));
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequestInvalidOldToken($privateKey)
+    public function testRespondToRequestInvalidOldToken()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -329,7 +311,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setClientRepository($clientRepositoryMock);
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $oldRefreshToken = 'foobar';
 
@@ -347,10 +329,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->respondToAccessTokenRequest($serverRequest, $responseType, new DateInterval('PT5M'));
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequestClientMismatch($privateKey)
+    public function testRespondToRequestClientMismatch()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -369,7 +348,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setClientRepository($clientRepositoryMock);
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $oldRefreshToken = $this->cryptStub->doEncrypt(
             \json_encode(
@@ -398,10 +377,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->respondToAccessTokenRequest($serverRequest, $responseType, new DateInterval('PT5M'));
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequestExpiredToken($privateKey)
+    public function testRespondToRequestExpiredToken()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -417,7 +393,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setClientRepository($clientRepositoryMock);
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $oldRefreshToken = $this->cryptStub->doEncrypt(
             \json_encode(
@@ -446,10 +422,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->respondToAccessTokenRequest($serverRequest, $responseType, new DateInterval('PT5M'));
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequestRevokedToken($privateKey)
+    public function testRespondToRequestRevokedToken()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -466,7 +439,7 @@ class RefreshTokenGrantTest extends TestCase
         $grant->setClientRepository($clientRepositoryMock);
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $oldRefreshToken = $this->cryptStub->doEncrypt(
             \json_encode(
@@ -493,13 +466,5 @@ class RefreshTokenGrantTest extends TestCase
         $this->expectExceptionCode(8);
 
         $grant->respondToAccessTokenRequest($serverRequest, $responseType, new DateInterval('PT5M'));
-    }
-
-    public function privateKeys(): array
-    {
-        return [
-            'file key' => ['file://' . __DIR__ . '/../Stubs/private.key'],
-            'inmemory key' => [\file_get_contents(__DIR__ . '/../Stubs/private.key')],
-        ];
     }
 }

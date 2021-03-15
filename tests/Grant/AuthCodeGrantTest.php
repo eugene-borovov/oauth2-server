@@ -500,10 +500,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->completeAuthorizationRequest($authRequest);
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToAccessTokenRequest($privateKey)
+    public function testRespondToAccessTokenRequest()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -535,7 +532,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setRefreshTokenRepository($refreshTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -572,10 +569,7 @@ class AuthCodeGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $response->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToAccessTokenRequestUsingHttpBasicAuth($privateKey)
+    public function testRespondToAccessTokenRequestUsingHttpBasicAuth()
     {
         $client = new ClientEntity();
         $client->setRedirectUri('http://foo/bar');
@@ -603,7 +597,7 @@ class AuthCodeGrantTest extends TestCase
         $authCodeGrant->setScopeRepository($scopeRepositoryMock);
         $authCodeGrant->setAccessTokenRepository($accessTokenRepositoryMock);
         $authCodeGrant->setEncryptionKey($this->cryptStub->getKey());
-        $authCodeGrant->setPrivateKey(new CryptKey($privateKey));
+        $authCodeGrant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -641,10 +635,7 @@ class AuthCodeGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $response->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToAccessTokenRequestForPublicClient($privateKey)
+    public function testRespondToAccessTokenRequestForPublicClient()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -675,7 +666,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setRefreshTokenRepository($refreshTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -712,10 +703,7 @@ class AuthCodeGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $response->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToAccessTokenRequestNullRefreshToken($privateKey)
+    public function testRespondToAccessTokenRequestNullRefreshToken()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -746,7 +734,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->setScopeRepository($scopeRepositoryMock);
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -783,10 +771,7 @@ class AuthCodeGrantTest extends TestCase
         $this->assertNull($response->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToAccessTokenRequestCodeChallengePlain($privateKey)
+    public function testRespondToAccessTokenRequestCodeChallengePlain()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -819,7 +804,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setRefreshTokenRepository($refreshTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -859,10 +844,7 @@ class AuthCodeGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $response->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToAccessTokenRequestCodeChallengeS256($privateKey)
+    public function testRespondToAccessTokenRequestCodeChallengeS256()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -895,7 +877,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setRefreshTokenRepository($refreshTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -1722,10 +1704,7 @@ class AuthCodeGrantTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testAuthCodeRepositoryUniqueConstraintCheck($privateKey)
+    public function testAuthCodeRepositoryUniqueConstraintCheck()
     {
         $authRequest = new AuthorizationRequest();
         $authRequest->setAuthorizationApproved(true);
@@ -1753,7 +1732,7 @@ class AuthCodeGrantTest extends TestCase
             new DateInterval('PT10M')
         );
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $this->assertInstanceOf(RedirectResponse::class, $grant->completeAuthorizationRequest($authRequest));
     }
@@ -1807,10 +1786,7 @@ class AuthCodeGrantTest extends TestCase
         $this->assertInstanceOf(RedirectResponse::class, $grant->completeAuthorizationRequest($authRequest));
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRefreshTokenRepositoryUniqueConstraintCheck($privateKey)
+    public function testRefreshTokenRepositoryUniqueConstraintCheck()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -1851,7 +1827,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setRefreshTokenRepository($refreshTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -1888,10 +1864,7 @@ class AuthCodeGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $response->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRefreshTokenRepositoryFailToPersist($privateKey)
+    public function testRefreshTokenRepositoryFailToPersist()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -1922,7 +1895,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setRefreshTokenRepository($refreshTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -1962,10 +1935,7 @@ class AuthCodeGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $response->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRefreshTokenRepositoryFailToPersistUniqueNoInfiniteLoop($privateKey)
+    public function testRefreshTokenRepositoryFailToPersistUniqueNoInfiniteLoop()
     {
         $client = new ClientEntity();
         $client->setIdentifier('foo');
@@ -1996,7 +1966,7 @@ class AuthCodeGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setRefreshTokenRepository($refreshTokenRepositoryMock);
         $grant->setEncryptionKey($this->cryptStub->getKey());
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $request = new ServerRequest(
             [],
@@ -2168,13 +2138,5 @@ class AuthCodeGrantTest extends TestCase
         $this->expectExceptionCode(4);
 
         $grant->validateAuthorizationRequest($request);
-    }
-
-    public function privateKeys(): array
-    {
-        return [
-            'file key' => ['file://' . __DIR__ . '/../Stubs/private.key'],
-            'inmemory key' => [\file_get_contents(__DIR__ . '/../Stubs/private.key')],
-        ];
     }
 }

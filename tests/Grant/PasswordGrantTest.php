@@ -34,10 +34,7 @@ class PasswordGrantTest extends TestCase
         $this->assertEquals('password', $grant->getIdentifier());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequest($privateKey)
+    public function testRespondToRequest()
     {
         $client = new ClientEntity();
         $client->setRedirectUri('http://foo/bar');
@@ -67,7 +64,7 @@ class PasswordGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setScopeRepository($scopeRepositoryMock);
         $grant->setDefaultScope(self::DEFAULT_SCOPE);
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $serverRequest = (new ServerRequest())->withParsedBody([
             'client_id'     => 'foo',
@@ -83,10 +80,7 @@ class PasswordGrantTest extends TestCase
         $this->assertInstanceOf(RefreshTokenEntityInterface::class, $responseType->getRefreshToken());
     }
 
-    /**
-     * @dataProvider privateKeys
-     */
-    public function testRespondToRequestNullRefreshToken($privateKey)
+    public function testRespondToRequestNullRefreshToken()
     {
         $client = new ClientEntity();
         $client->setRedirectUri('http://foo/bar');
@@ -115,7 +109,7 @@ class PasswordGrantTest extends TestCase
         $grant->setAccessTokenRepository($accessTokenRepositoryMock);
         $grant->setScopeRepository($scopeRepositoryMock);
         $grant->setDefaultScope(self::DEFAULT_SCOPE);
-        $grant->setPrivateKey(new CryptKey($privateKey));
+        $grant->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $serverRequest = (new ServerRequest())->withParsedBody([
             'client_id'     => 'foo',
@@ -220,13 +214,5 @@ class PasswordGrantTest extends TestCase
         $this->expectExceptionCode(10);
 
         $grant->respondToAccessTokenRequest($serverRequest, $responseType, new DateInterval('PT5M'));
-    }
-
-    public function privateKeys(): array
-    {
-        return [
-            'file key' => ['file://' . __DIR__ . '/../Stubs/private.key'],
-            'inmemory key' => [\file_get_contents(__DIR__ . '/../Stubs/private.key')],
-        ];
     }
 }

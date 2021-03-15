@@ -16,14 +16,11 @@ use PHPUnit\Framework\TestCase;
 
 class ResourceServerMiddlewareTest extends TestCase
 {
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testValidResponse($privateKey, $publicKey)
+    public function testValidResponse()
     {
         $server = new ResourceServer(
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
-            $publicKey
+            'file://' . __DIR__ . '/../Stubs/public.key'
         );
 
         $client = new ClientEntity();
@@ -34,7 +31,7 @@ class ResourceServerMiddlewareTest extends TestCase
         $accessToken->setUserIdentifier(123);
         $accessToken->setExpiryDateTime((new DateTimeImmutable())->add(new DateInterval('PT1H')));
         $accessToken->setClient($client);
-        $accessToken->setPrivateKey(new CryptKey($privateKey));
+        $accessToken->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $token = (string) $accessToken;
 
@@ -54,14 +51,11 @@ class ResourceServerMiddlewareTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testValidResponseExpiredToken($privateKey, $publicKey)
+    public function testValidResponseExpiredToken()
     {
         $server = new ResourceServer(
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
-            $publicKey
+            'file://' . __DIR__ . '/../Stubs/public.key'
         );
 
         $client = new ClientEntity();
@@ -72,7 +66,7 @@ class ResourceServerMiddlewareTest extends TestCase
         $accessToken->setUserIdentifier(123);
         $accessToken->setExpiryDateTime((new DateTimeImmutable())->sub(new DateInterval('PT1H')));
         $accessToken->setClient($client);
-        $accessToken->setPrivateKey(new CryptKey($privateKey));
+        $accessToken->setPrivateKey(new CryptKey('file://' . __DIR__ . '/../Stubs/private.key'));
 
         $token = (string) $accessToken;
 
@@ -92,14 +86,11 @@ class ResourceServerMiddlewareTest extends TestCase
         $this->assertEquals(401, $response->getStatusCode());
     }
 
-    /**
-     * @dataProvider signerKeys
-     */
-    public function testErrorResponse($privateKey, $publicKey)
+    public function testErrorResponse()
     {
         $server = new ResourceServer(
             $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock(),
-            $publicKey
+            'file://' . __DIR__ . '/../Stubs/public.key'
         );
 
         $request = (new ServerRequest())->withHeader('authorization', '');
@@ -114,19 +105,5 @@ class ResourceServerMiddlewareTest extends TestCase
         );
 
         $this->assertEquals(401, $response->getStatusCode());
-    }
-
-    public function signerKeys(): array
-    {
-        return [
-            'file key' => [
-                'file://' . __DIR__ . '/../Stubs/private.key',
-                'file://' . __DIR__ . '/../Stubs/public.key',
-            ],
-            'inmemory key' => [
-                \file_get_contents(__DIR__ . '/../Stubs/private.key'),
-                \file_get_contents(__DIR__ . '/../Stubs/public.key'),
-            ],
-        ];
     }
 }

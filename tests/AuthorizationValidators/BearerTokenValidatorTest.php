@@ -15,15 +15,12 @@ use ReflectionClass;
 
 class BearerTokenValidatorTest extends TestCase
 {
-    /**
-     * @dataProvider publicKeys
-     */
-    public function testBearerTokenValidatorAcceptsValidToken($publicKey)
+    public function testBearerTokenValidatorAcceptsValidToken()
     {
         $accessTokenRepositoryMock = $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock();
 
         $bearerTokenValidator = new BearerTokenValidator($accessTokenRepositoryMock);
-        $bearerTokenValidator->setPublicKey(new CryptKey($publicKey));
+        $bearerTokenValidator->setPublicKey(new CryptKey('file://' . __DIR__ . '/../Stubs/public.key'));
 
         $bearerTokenValidatorReflection = new ReflectionClass(BearerTokenValidator::class);
         $jwtConfiguration = $bearerTokenValidatorReflection->getProperty('jwtConfiguration');
@@ -46,15 +43,40 @@ class BearerTokenValidatorTest extends TestCase
         $this->assertArrayHasKey('authorization', $response->getHeaders());
     }
 
-    /**
-     * @dataProvider publicKeys
-     */
-    public function testBearerTokenValidatorRejectsExpiredToken($publicKey)
+    public function testBearerTokenValidatorAcceptsValidTokenInmemoryKey()
     {
         $accessTokenRepositoryMock = $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock();
 
         $bearerTokenValidator = new BearerTokenValidator($accessTokenRepositoryMock);
-        $bearerTokenValidator->setPublicKey(new CryptKey($publicKey));
+        $bearerTokenValidator->setPublicKey(new CryptKey(file_get_contents(__DIR__ . '/../Stubs/public.key')));
+
+        $bearerTokenValidatorReflection = new ReflectionClass(BearerTokenValidator::class);
+        $jwtConfiguration = $bearerTokenValidatorReflection->getProperty('jwtConfiguration');
+        $jwtConfiguration->setAccessible(true);
+
+        $validJwt = $jwtConfiguration->getValue($bearerTokenValidator)->builder()
+            ->permittedFor('client-id')
+            ->identifiedBy('token-id')
+            ->issuedAt(new DateTimeImmutable())
+            ->canOnlyBeUsedAfter(new DateTimeImmutable())
+            ->expiresAt((new DateTimeImmutable())->add(new DateInterval('PT1H')))
+            ->relatedTo('user-id')
+            ->withClaim('scopes', 'scope1 scope2 scope3 scope4')
+            ->getToken(new Sha256(), LocalFileReference::file(__DIR__ . '/../Stubs/private.key'));
+
+        $request = (new ServerRequest())->withHeader('authorization', \sprintf('Bearer %s', $validJwt->toString()));
+
+        $response = $bearerTokenValidator->validateAuthorization($request);
+
+        $this->assertArrayHasKey('authorization', $response->getHeaders());
+    }
+
+    public function testBearerTokenValidatorRejectsExpiredToken()
+    {
+        $accessTokenRepositoryMock = $this->getMockBuilder(AccessTokenRepositoryInterface::class)->getMock();
+
+        $bearerTokenValidator = new BearerTokenValidator($accessTokenRepositoryMock);
+        $bearerTokenValidator->setPublicKey(new CryptKey('file://' . __DIR__ . '/../Stubs/public.key'));
 
         $bearerTokenValidatorReflection = new ReflectionClass(BearerTokenValidator::class);
         $jwtConfiguration = $bearerTokenValidatorReflection->getProperty('jwtConfiguration');
@@ -76,13 +98,5 @@ class BearerTokenValidatorTest extends TestCase
         $this->expectExceptionCode(9);
 
         $bearerTokenValidator->validateAuthorization($request);
-    }
-
-    public function publicKeys()
-    {
-        return [
-            'file key' => ['file://' . __DIR__ . '/../Stubs/public.key'],
-            'inmemory key' => [\file_get_contents(__DIR__ . '/../Stubs/public.key')],
-        ];
     }
 }
